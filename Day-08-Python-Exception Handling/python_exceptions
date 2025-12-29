@@ -1,0 +1,602 @@
+# Python Built-in Exceptions - Complete Reference
+
+## Table of Contents
+1. Exception Hierarchy
+2. Fundamental Base Classes
+3. Common Runtime Errors
+4. Math & Calculation Errors
+5. Input/Output & OS Errors
+6. Interruptions & System Events
+7. Module Import Errors
+8. Exception Handling Best Practices
+9. Custom Exceptions
+
+---
+
+## 1. Exception Hierarchy
+
+All exceptions in Python inherit from a base hierarchy:
+
+```
+BaseException
+├── SystemExit
+├── KeyboardInterrupt
+├── GeneratorExit
+└── Exception
+    ├── StopIteration
+    ├── StopAsyncIteration
+    ├── ArithmeticError
+    │   ├── FloatingPointError
+    │   ├── OverflowError
+    │   └── ZeroDivisionError
+    ├── AssertionError
+    ├── AttributeError
+    ├── BufferError
+    ├── EOFError
+    ├── ImportError
+    │   └── ModuleNotFoundError
+    ├── LookupError
+    │   ├── IndexError
+    │   └── KeyError
+    ├── MemoryError
+    ├── NameError
+    │   └── UnboundLocalError
+    ├── OSError
+    │   ├── FileNotFoundError
+    │   ├── PermissionError
+    │   ├── TimeoutError
+    │   ├── BlockingIOError
+    │   ├── ChildProcessError
+    │   └── ConnectionError
+    ├── ReferenceError
+    ├── RuntimeError
+    ├── SyntaxError
+    │   └── IndentationError
+    ├── SystemError
+    ├── TypeError
+    ├── ValueError
+    │   └── UnicodeError
+    └── Warning
+```
+
+---
+
+## 2. Fundamental Base Classes
+
+### BaseException
+- **Root of all exceptions**
+- Rarely caught directly (catch `Exception` instead)
+- Never inherit from this unless creating system-level code
+
+### Exception
+- **Parent of all "regular" errors**
+- The proper base class for user-defined exceptions
+- Excludes system signals like `KeyboardInterrupt` and `SystemExit`
+
+```python
+# Good: inherit from Exception
+class CustomError(Exception):
+    pass
+
+# Avoid: inherit from BaseException
+class BadCustomError(BaseException):
+    pass
+```
+
+---
+
+## 3. Common Runtime Errors (Program Logic)
+
+### SyntaxError
+**When**: Invalid Python code structure
+```python
+if True print("hi")  # Missing colon
+# SyntaxError: invalid syntax
+```
+
+### IndentationError
+**When**: Wrong indentation levels (subclass of SyntaxError)
+```python
+if True:
+print("hello")  # IndentationError: expected an indented block
+```
+
+### NameError
+**When**: Using a variable that hasn't been defined
+```python
+print(x)  # x is not defined
+# NameError: name 'x' is not defined
+```
+
+### TypeError
+**When**: Operation on incompatible types
+```python
+"Age: " + 25  # Can't concatenate str + int
+# TypeError: can only concatenate str (not "int") to str
+
+len(42)  # len() expects iterable
+# TypeError: object of type 'int' has no len()
+```
+
+### ValueError
+**When**: Right type, but inappropriate value
+```python
+int("hello")  # Can't convert non-numeric string to int
+# ValueError: invalid literal for int() with base 10: 'hello'
+
+my_tuple = (1, 2, 3)
+my_tuple.index(5)  # Value not in tuple
+# ValueError: tuple.index(x): x not in tuple
+```
+
+### IndexError
+**When**: Accessing a list/tuple index that doesn't exist
+```python
+lst = [1, 2, 3]
+print(lst[10])  # Index out of range
+# IndexError: list index out of range
+```
+
+### KeyError
+**When**: Accessing a dictionary key that isn't there
+```python
+person = {"name": "Vijay", "age": 25}
+print(person["salary"])  # Key doesn't exist
+# KeyError: 'salary'
+```
+
+### AttributeError
+**When**: Using a method/attribute that doesn't exist on an object
+```python
+my_list = [1, 2, 3]
+my_list.push(4)  # Lists use append, not push
+# AttributeError: 'list' object has no attribute 'push'
+
+my_string = "hello"
+my_string.upper_case()  # Method doesn't exist
+# AttributeError: 'str' object has no attribute 'upper_case'
+```
+
+### AssertionError
+**When**: An `assert` statement condition is False
+```python
+x = 5
+assert x > 10, "x must be greater than 10"
+# AssertionError: x must be greater than 10
+```
+
+---
+
+## 4. Math & Calculation Errors
+
+All inherit from `ArithmeticError`.
+
+### ZeroDivisionError
+**When**: Dividing by zero
+```python
+result = 10 / 0
+# ZeroDivisionError: division by zero
+
+result = 10 // 0
+# ZeroDivisionError: integer division or modulo by zero
+```
+
+### OverflowError
+**When**: Calculation result is too large (rare in Python integers, common in floats)
+```python
+import math
+math.exp(1000)  # Result too large
+# OverflowError: math range error
+```
+
+### FloatingPointError
+**When**: Floating-point operation fails (requires special configuration)
+```python
+# Rare in normal Python usage
+# Usually requires calling low-level operations
+```
+
+---
+
+## 5. Input/Output & OS Errors
+
+All inherit from `OSError`.
+
+### FileNotFoundError
+**When**: Trying to open a file that doesn't exist
+```python
+with open("nonexistent.txt", "r") as f:
+    content = f.read()
+# FileNotFoundError: [Errno 2] No such file or directory: 'nonexistent.txt'
+```
+
+### PermissionError
+**When**: Trying to access a file without permission
+```python
+with open("/root/secret.txt", "r") as f:  # No read permission
+    content = f.read()
+# PermissionError: [Errno 13] Permission denied: '/root/secret.txt'
+```
+
+### TimeoutError
+**When**: A system function times out
+```python
+import socket
+socket.socket().connect(("192.0.2.1", 80), timeout=0.001)
+# TimeoutError: [Errno 110] Connection timed out
+```
+
+### BlockingIOError
+**When**: Non-blocking I/O operation would block
+```python
+# Occurs with non-blocking file descriptors or sockets
+```
+
+### ChildProcessError
+**When**: Error in child process (multiprocessing context)
+```python
+import subprocess
+subprocess.run(["nonexistent_command"], check=True)
+# ChildProcessError or FileNotFoundError
+```
+
+### ConnectionError (and subclasses)
+**When**: Network/socket connection fails
+```python
+import socket
+socket.socket().connect(("invalid-host", 80))
+# ConnectionError: [Errno -2] Name or service not known
+```
+
+**Subclasses**:
+- `ConnectionAbortedError`: Connection aborted
+- `ConnectionRefusedError`: Connection refused
+- `ConnectionResetError`: Connection reset by peer
+- `BrokenPipeError`: Broken pipe
+
+---
+
+## 6. Interruptions & System Events
+
+These are NOT errors in your code—they signal external interruptions.
+
+### KeyboardInterrupt
+**When**: User presses **Ctrl+C** to stop the script
+```python
+import time
+while True:
+    time.sleep(1)
+# Press Ctrl+C
+# KeyboardInterrupt: (triggered by Ctrl+C)
+```
+
+**Best Practice**: Catch it to cleanup resources
+```python
+try:
+    while True:
+        # Your long operation
+        pass
+except KeyboardInterrupt:
+    print("Script interrupted by user")
+    # Cleanup code here
+```
+
+### SystemExit
+**When**: `sys.exit()` is called
+```python
+import sys
+sys.exit(1)  # Exit with code 1
+# SystemExit: 1
+```
+
+### StopIteration
+**When**: `next()` is called on an exhausted iterator
+```python
+it = iter([1, 2, 3])
+next(it)  # 1
+next(it)  # 2
+next(it)  # 3
+next(it)  # StopIteration (no more items)
+```
+
+**Note**: Usually handled internally by `for` loops; you rarely see this.
+
+### GeneratorExit
+**When**: `close()` is called on a generator
+```python
+def my_gen():
+    try:
+        yield 1
+        yield 2
+    except GeneratorExit:
+        print("Generator closed")
+
+g = my_gen()
+next(g)  # 1
+g.close()  # GeneratorExit raised inside generator
+```
+
+### MemoryError
+**When**: Python runs out of RAM
+```python
+# Create a list too large for available memory
+huge_list = [0] * (10**18)
+# MemoryError: Unable to allocate X GiB for an array
+```
+
+---
+
+## 7. Module Import Errors
+
+### ImportError
+**When**: Import statement fails (base class)
+```python
+from nonexistent_module import something
+# ImportError: cannot import name 'something' from 'nonexistent_module'
+```
+
+### ModuleNotFoundError
+**When**: The module name itself doesn't exist (subclass of ImportError, Python 3.6+)
+```python
+import request  # Should be 'requests'
+# ModuleNotFoundError: No module named 'request'
+```
+
+---
+
+## 8. Less Common Exceptions
+
+### EOFError
+**When**: `input()` reaches end-of-file
+```python
+# In a script fed with EOF
+user_input = input()
+# EOFError: EOF when reading a line
+```
+
+### ReferenceError
+**When**: Accessing an object that was garbage collected (very rare)
+```python
+import weakref
+class MyClass:
+    pass
+
+obj = MyClass()
+weak_ref = weakref.ref(obj)
+del obj  # Delete the object
+weak_ref()  # Returns None (object was garbage collected)
+```
+
+### UnboundLocalError
+**When**: Referencing a local variable before assignment (subclass of NameError)
+```python
+x = 5
+def func():
+    print(x)  # Trying to use x before assignment
+    x = 10
+func()
+# UnboundLocalError: local variable 'x' referenced before assignment
+```
+
+### RuntimeError
+**When**: Generic runtime error that doesn't fit other categories
+```python
+# Often raised by libraries for unclassified errors
+raise RuntimeError("Something went wrong")
+```
+
+---
+
+## 9. Exception Handling Best Practices
+
+### Basic Try-Except
+```python
+try:
+    result = 10 / 0
+except ZeroDivisionError:
+    print("Cannot divide by zero!")
+```
+
+### Multiple Exception Types
+```python
+try:
+    value = int(input("Enter a number: "))
+    result = 10 / value
+except ValueError:
+    print("Invalid input! Must be a number.")
+except ZeroDivisionError:
+    print("Cannot divide by zero!")
+```
+
+### Catch Multiple Exceptions in One Block
+```python
+try:
+    # risky operation
+    pass
+except (ValueError, TypeError, KeyError) as e:
+    print(f"Error occurred: {e}")
+```
+
+### Using Else (Executes if NO exception)
+```python
+try:
+    result = 10 / 2
+except ZeroDivisionError:
+    print("Error!")
+else:
+    print(f"Result: {result}")  # Prints "Result: 5.0"
+```
+
+### Using Finally (Always executes)
+```python
+try:
+    file = open("data.txt")
+    content = file.read()
+except FileNotFoundError:
+    print("File not found!")
+finally:
+    file.close()  # Always runs, even if exception occurs
+```
+
+### Complete Try-Except-Else-Finally
+```python
+try:
+    file = open("data.txt")
+    content = file.read()
+    result = int(content)
+except FileNotFoundError:
+    print("File not found!")
+except ValueError:
+    print("File doesn't contain a valid integer!")
+else:
+    print(f"Successfully read: {result}")
+finally:
+    file.close()  # Cleanup always runs
+```
+
+### Get Exception Details
+```python
+try:
+    1 / 0
+except ZeroDivisionError as e:
+    print(f"Error type: {type(e).__name__}")
+    print(f"Error message: {str(e)}")
+    # Error type: ZeroDivisionError
+    # Error message: division by zero
+```
+
+### Re-raising Exceptions
+```python
+try:
+    risky_operation()
+except ValueError as e:
+    print("Logging the error...")
+    raise  # Re-raise the same exception
+```
+
+### Catch All Exceptions (Use with Caution!)
+```python
+try:
+    # risky code
+    pass
+except Exception as e:  # Catches all regular exceptions
+    print(f"Unexpected error: {e}")
+```
+
+**Warning**: Avoid bare `except:` as it catches `SystemExit` and `KeyboardInterrupt` too!
+
+---
+
+## 10. Creating Custom Exceptions
+
+### Simple Custom Exception
+```python
+class InsufficientBalanceError(Exception):
+    pass
+
+class BankAccount:
+    def __init__(self, balance):
+        self.balance = balance
+    
+    def withdraw(self, amount):
+        if amount > self.balance:
+            raise InsufficientBalanceError("Insufficient balance to withdraw")
+        self.balance -= amount
+
+account = BankAccount(1000)
+try:
+    account.withdraw(2000)
+except InsufficientBalanceError as e:
+    print(f"Error: {e}")
+```
+
+### Custom Exception with Extra Data
+```python
+class InvalidAgeError(Exception):
+    def __init__(self, age, message="Age must be between 0 and 150"):
+        self.age = age
+        self.message = message
+        super().__init__(self.message)
+
+def validate_age(age):
+    if not (0 <= age <= 150):
+        raise InvalidAgeError(age)
+    return age
+
+try:
+    validate_age(200)
+except InvalidAgeError as e:
+    print(f"Invalid age {e.age}: {e.message}")
+```
+
+### Exception Hierarchy for Your Project
+```python
+class ProjectError(Exception):
+    """Base class for all project-specific errors"""
+    pass
+
+class DatabaseError(ProjectError):
+    """Raised for database-related errors"""
+    pass
+
+class AuthenticationError(ProjectError):
+    """Raised for authentication failures"""
+    pass
+
+class ValidationError(ProjectError):
+    """Raised for data validation failures"""
+    pass
+
+# Usage
+try:
+    # Some operation
+    pass
+except DatabaseError:
+    print("Database issue!")
+except AuthenticationError:
+    print("Auth failed!")
+except ValidationError:
+    print("Invalid data!")
+except ProjectError as e:
+    print(f"Unexpected project error: {e}")
+```
+
+---
+
+## Quick Reference Table
+
+| Exception | Cause | Example |
+| :--- | :--- | :--- |
+| `SyntaxError` | Invalid syntax | `if True print()` |
+| `IndentationError` | Bad indentation | Misaligned code blocks |
+| `NameError` | Undefined variable | `print(undefined_var)` |
+| `TypeError` | Wrong type | `"text" + 5` |
+| `ValueError` | Right type, wrong value | `int("abc")` |
+| `IndexError` | List index out of range | `lst[999]` |
+| `KeyError` | Dict key missing | `dict["missing"]` |
+| `AttributeError` | Attribute doesn't exist | `obj.invalid_attr` |
+| `ZeroDivisionError` | Division by zero | `10 / 0` |
+| `FileNotFoundError` | File doesn't exist | `open("missing.txt")` |
+| `PermissionError` | No file permission | Accessing protected file |
+| `ModuleNotFoundError` | Module not installed | `import missing_lib` |
+| `KeyboardInterrupt` | User pressed Ctrl+C | Long-running script |
+| `MemoryError` | Out of RAM | Creating massive list |
+
+---
+
+## Summary
+
+- **Tier 1 (Most Common)**: `TypeError`, `ValueError`, `NameError`, `IndexError`, `KeyError`, `FileNotFoundError`
+- **Tier 2 (Common)**: `AttributeError`, `ZeroDivisionError`, `ImportError`, `KeyboardInterrupt`
+- **Tier 3 (Occasional)**: `AssertionError`, `RuntimeError`, `OSError` subclasses
+- **Tier 4 (Rare)**: `MemoryError`, `ReferenceError`, `GeneratorExit`
+
+Always inherit from `Exception` when creating custom exceptions, use specific exception types in except blocks, and implement proper cleanup with `finally` blocks.
+
+For your AI/ML journey, you'll frequently encounter:
+- `ValueError` (bad data)
+- `FileNotFoundError` (missing datasets)
+- `TypeError` (incompatible operations)
+- `IndexError` (array/tensor indexing errors)
+- `KeyError` (dict/config access)
+- `ImportError` (missing libraries)
