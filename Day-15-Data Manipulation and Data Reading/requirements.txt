@@ -1,0 +1,7 @@
+ipykernel
+pandas
+numpy
+lxml
+html5lib
+beautifulsoup4
+openpyxl
