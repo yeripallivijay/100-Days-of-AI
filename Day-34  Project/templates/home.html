@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FWI Prediction | Forest Fire Risk Assessment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        input[type="text"]::placeholder {
+            color: #95a5a6;
+        }
+
+        .predict-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        /* RESULT DISPLAY */
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            background: black;
+            color: white;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result-value {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 10px 0;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+
+        .risk-indicator {
+            font-size: 16px;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .risk-low { background: red;color:white }
+        .risk-medium { background: orange; color: #f39c12;color:white }
+        .risk-high { background: green; color: #e74c3c; color:white}
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .result-value {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 FWI Predictor</h1>
+        <p class="subtitle">Enter weather parameters for instant Fire Weather Index prediction</p>
+
+        <form action="{{ url_for('predict_datapoint') }}" method="post">
+            <div class="form-group">
+                <input type="text" name="Temperature" placeholder="Temperature (°C)" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="RH" placeholder="Relative Humidity (%)" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="Ws" placeholder="Wind Speed (km/h)" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="Rain" placeholder="Rain (mm)" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="FFMC" placeholder="FFMC Index" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="DMC" placeholder="DMC Index" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="ISI" placeholder="ISI Index" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="Classes" placeholder="Classes (0/1)" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="Region" placeholder="Region (0/1)" required>
+            </div>
+
+            <button type="submit" class="predict-btn">🔥 Predict FWI</button>
+        </form>
+
+        {% if result is defined %}
+        <div class="result-section show">
+            <div class="result-title">Fire Weather Index</div>
+            <div class="result-value">{{ "%.2f"|format(result) }}</div>
+            <div class="risk-indicator risk-{{ 'high' if result > 30 else 'medium' if result > 15 else 'low' }}">
+                {% if result > 30 %}
+                    High Fire Risk
+                {% elif result > 15 %}
+                    Moderate Fire Risk  
+                {% else %}
+                    Low Fire Risk
+                {% endif %}
+            </div>
+            <a href="{{ url_for('predict_datapoint') }}" class="back-link">← New Prediction</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
