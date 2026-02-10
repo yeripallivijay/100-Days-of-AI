@@ -1,0 +1,14 @@
+# FROM baseImage
+# COPY
+# WORKDIR
+# RUN
+# CMD
+
+# Using Docker in the vscode
+# docker build -t welcome-app .
+# docker build --debug .
+# docker run -p 5000:5000 welcome-app
+# renaming the docker app -> docker tag username/welcome-app username/welcome-app1
+# pushing the docker image -> docker push vijayeripilli/welcome-app:latest
+# pulling the image -> pulling from vijayeripilli/welcome-app
+## running the image -> docker run -d -p 5000:5000 vijayeripilli/welcome-app:latest
