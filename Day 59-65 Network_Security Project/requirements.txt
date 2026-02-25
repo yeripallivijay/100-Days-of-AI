@@ -1,0 +1,14 @@
+python-dotenv
+pandas
+numpy
+pymongo
+certifi
+pymongo[srv]
+scikit-learn
+pyaml
+mlflow
+dagshub
+fastapi
+uvicorn
+python-multipart
+# -e .   (better to use this line after the completion of the code)
